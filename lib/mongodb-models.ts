@@ -4,7 +4,9 @@ import type { Booking, BookingStatus, EmailLogEntry } from "./types"
 
 // ============ BOOKINGS COLLECTION ============
 
-export async function createBooking(input: Omit<Booking, "id" | "createdAt" | "status">): Promise<Booking> {
+export async function createBooking(
+  input: Omit<Booking, "id" | "createdAt" | "status">
+): Promise<Booking> {
   const db = await getDatabase()
   const collection = db.collection("bookings")
 
@@ -70,15 +72,19 @@ export async function getBookingById(id: string): Promise<Booking | null> {
   }
 }
 
-export async function updateBookingStatus(id: string, status: BookingStatus): Promise<Booking | null> {
+export async function updateBookingStatus(
+  id: string,
+  status: BookingStatus
+): Promise<Booking | null> {
   const db = await getDatabase()
   const collection = db.collection("bookings")
 
   try {
+    // ✅ Correct ObjectId usage here
     const result = await collection.findOneAndUpdate(
       { _id: new ObjectId(id) },
       { $set: { status } },
-      { returnDocument: "after" },
+      { returnDocument: "after" }
     )
 
     if (!result.value) return null
@@ -97,14 +103,17 @@ export async function updateBookingStatus(id: string, status: BookingStatus): Pr
       service: booking.service,
       location: booking.location,
     }
-  } catch {
+  } catch (err) {
+    console.error("Update failed:", err)
     return null
   }
 }
 
 // ============ EMAIL LOG COLLECTION ============
 
-export async function createEmailLog(input: Omit<EmailLogEntry, "id" | "createdAt">): Promise<EmailLogEntry> {
+export async function createEmailLog(
+  input: Omit<EmailLogEntry, "id" | "createdAt">
+): Promise<EmailLogEntry> {
   const db = await getDatabase()
   const collection = db.collection("email_logs")
 
