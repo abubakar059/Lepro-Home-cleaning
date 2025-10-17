@@ -86,10 +86,9 @@ export async function updateBookingStatus(
       { $set: { status } },
       { returnDocument: "after" }
     )
+    if (!result) return null
 
-    if (!result.value) return null
-
-    const booking = result.value
+    const booking = result
     return {
       id: booking._id.toString(),
       name: booking.name,
