@@ -9,7 +9,7 @@ type EmailPayload = {
 
 
 const FROM_EMAIL = "admin@leprohomeservices.ca"
-const ADMIN_EMAIL = "admin@leprohomeservices.ca"
+const ADMIN_EMAIL = "admin@leprohomeservices.ca,george@leprohomeservices.ca"
 
 // Nodemailer SMTP configuration
 const SMTP_HOST = "smtp.hostinger.com"
