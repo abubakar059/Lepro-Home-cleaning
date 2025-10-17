@@ -1,47 +1,85 @@
+import nodemailer from "nodemailer"
+import { emailLogStore } from "./email-log"
+
 type EmailPayload = {
   to: string | string[]
   subject: string
   html: string
 }
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY
-const FROM_EMAIL = process.env.FROM_EMAIL || "LePro Home Services <noreply@example.com>"
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL
 
-import { emailLogStore } from "./email-log"
+const FROM_EMAIL = "admin@leprohomeservices.ca"
+const ADMIN_EMAIL = "admin@leprohomeservices.ca"
+
+// Nodemailer SMTP configuration
+const SMTP_HOST = "smtp.hostinger.com"
+const SMTP_PORT = 587
+const SMTP_USER = "admin@leprohomeservices.ca"
+const SMTP_PASS = "Adminleprohom1@"
+const SMTP_SECURE = false
+
+// Create reusable transporter
+let transporter: nodemailer.Transporter | null = null
+
+function getTransporter() {
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    return null
+  }
+
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_SECURE,
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS,
+      },
+    })
+  }
+
+  return transporter
+}
 
 async function sendEmail({ to, subject, html }: EmailPayload) {
-  if (!RESEND_API_KEY) {
+  const transport = getTransporter()
+
+  if (!transport) {
     // Log the "would send" email for visibility in the admin dashboard
-    emailLogStore.add({ to: Array.isArray(to) ? to.join(", ") : to, subject, html, sent: false, error: "Missing RESEND_API_KEY" })
-    console.log("[v0] Missing RESEND_API_KEY; email not sent:", { to, subject })
+    emailLogStore.add({ 
+      to: Array.isArray(to) ? to.join(", ") : to, 
+      subject, 
+      html, 
+      sent: false, 
+      error: "Missing SMTP configuration (SMTP_HOST, SMTP_USER, or SMTP_PASS)" 
+    })
+    console.log("[v0] Missing SMTP configuration; email not sent:", { to, subject })
     return
   }
 
   try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        from: FROM_EMAIL,
-        to: Array.isArray(to) ? to : [to], // ✅ support multiple recipients
-        subject,
-        html,
-      }),
+    const info = await transport.sendMail({
+      from: FROM_EMAIL,
+      to: Array.isArray(to) ? to : [to], // ✅ support multiple recipients
+      subject,
+      html,
     })
 
-    if (!res.ok) {
-      const body = await res.text().catch(() => "")
-      emailLogStore.add({ to: Array.isArray(to) ? to.join(", ") : to, subject, html, sent: false, error: `Resend ${res.status}: ${body}` })
-      console.log("[v0] Resend error", res.status, body)
-    } else {
-      emailLogStore.add({ to: Array.isArray(to) ? to.join(", ") : to, subject, html, sent: true })
-    }
+    emailLogStore.add({ 
+      to: Array.isArray(to) ? to.join(", ") : to, 
+      subject, 
+      html, 
+      sent: true 
+    })
+    console.log("[v0] Email sent successfully:", info.messageId)
   } catch (err: any) {
-    emailLogStore.add({ to: Array.isArray(to) ? to.join(", ") : to, subject, html, sent: false, error: err?.message || "Unknown error" })
+    emailLogStore.add({ 
+      to: Array.isArray(to) ? to.join(", ") : to, 
+      subject, 
+      html, 
+      sent: false, 
+      error: err?.message || "Unknown error" 
+    })
     console.log("[v0] Email send failed:", err?.message || err)
   }
 }
