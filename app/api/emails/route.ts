@@ -1,11 +1,24 @@
 import { NextResponse } from "next/server"
-import { emailLogStore } from "@/lib/email-log"
+import { getEmailLogs, clearEmailLogs, ensureIndexes } from "@/lib/mongodb-models"
 
 export async function GET() {
-  return NextResponse.json({ emails: emailLogStore.list() })
+  try {
+    await ensureIndexes()
+    const emails = await getEmailLogs()
+    return NextResponse.json({ emails })
+  } catch (error) {
+    console.error("Error fetching email logs:", error)
+    return NextResponse.json({ error: "Failed to fetch email logs" }, { status: 500 })
+  }
 }
 
 export async function DELETE() {
-  emailLogStore.clear()
-  return NextResponse.json({ ok: true })
+  try {
+    await ensureIndexes()
+    await clearEmailLogs()
+    return NextResponse.json({ ok: true })
+  } catch (error) {
+    console.error("Error clearing email logs:", error)
+    return NextResponse.json({ error: "Failed to clear email logs" }, { status: 500 })
+  }
 }

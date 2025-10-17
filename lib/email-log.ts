@@ -1,3 +1,5 @@
+// This file is no longer used. All email log operations should use lib/mongodb-models.ts instead.
+
 export type EmailLogEntry = {
   id: string
   to: string

@@ -1,12 +1,11 @@
 import nodemailer from "nodemailer"
-import { emailLogStore } from "./email-log"
+import { createEmailLog, ensureIndexes } from "./mongodb-models"
 
 type EmailPayload = {
   to: string | string[]
   subject: string
   html: string
 }
-
 
 const FROM_EMAIL = "admin@leprohomeservices.ca"
 const ADMIN_EMAIL = "admin@leprohomeservices.ca,george@leprohomeservices.ca"
@@ -43,16 +42,27 @@ function getTransporter() {
 
 async function sendEmail({ to, subject, html }: EmailPayload) {
   const transport = getTransporter()
+  const toStr = Array.isArray(to) ? to.join(", ") : to
+
+  try {
+    await ensureIndexes()
+  } catch (err) {
+    console.error("[v0] Failed to ensure indexes:", err)
+  }
 
   if (!transport) {
     // Log the "would send" email for visibility in the admin dashboard
-    emailLogStore.add({ 
-      to: Array.isArray(to) ? to.join(", ") : to, 
-      subject, 
-      html, 
-      sent: false, 
-      error: "Missing SMTP configuration (SMTP_HOST, SMTP_USER, or SMTP_PASS)" 
-    })
+    try {
+      await createEmailLog({
+        to: toStr,
+        subject,
+        html,
+        sent: false,
+        error: "Missing SMTP configuration (SMTP_HOST, SMTP_USER, or SMTP_PASS)",
+      })
+    } catch (err) {
+      console.error("[v0] Failed to log email:", err)
+    }
     console.log("[v0] Missing SMTP configuration; email not sent:", { to, subject })
     return
   }
@@ -60,26 +70,30 @@ async function sendEmail({ to, subject, html }: EmailPayload) {
   try {
     const info = await transport.sendMail({
       from: FROM_EMAIL,
-      to: Array.isArray(to) ? to : [to], // ✅ support multiple recipients
+      to: Array.isArray(to) ? to : [to],
       subject,
       html,
     })
 
-    emailLogStore.add({ 
-      to: Array.isArray(to) ? to.join(", ") : to, 
-      subject, 
-      html, 
-      sent: true 
+    await createEmailLog({
+      to: toStr,
+      subject,
+      html,
+      sent: true,
     })
     console.log("[v0] Email sent successfully:", info.messageId)
   } catch (err: any) {
-    emailLogStore.add({ 
-      to: Array.isArray(to) ? to.join(", ") : to, 
-      subject, 
-      html, 
-      sent: false, 
-      error: err?.message || "Unknown error" 
-    })
+    try {
+      await createEmailLog({
+        to: toStr,
+        subject,
+        html,
+        sent: false,
+        error: err?.message || "Unknown error",
+      })
+    } catch (logErr) {
+      console.error("[v0] Failed to log email error:", logErr)
+    }
     console.log("[v0] Email send failed:", err?.message || err)
   }
 }
@@ -100,7 +114,7 @@ export async function sendAdminNewBookingEmail(booking: {
   }
 
   // ✅ Support multiple admin emails separated by commas
-  const adminEmails = ADMIN_EMAIL.split(",").map(e => e.trim())
+  const adminEmails = ADMIN_EMAIL.split(",").map((e) => e.trim())
 
   const subject = `New Booking Request from ${booking.name} (${booking.date} ${booking.time})`
   const html = `

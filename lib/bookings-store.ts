@@ -1,3 +1,5 @@
+// This file is no longer used. All booking operations should use lib/mongodb-models.ts instead.
+
 import type { Booking, BookingStatus } from "./types"
 
 type Store = {

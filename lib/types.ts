@@ -13,3 +13,13 @@ export interface Booking {
   service?: string
   location?: string
 }
+
+export type EmailLogEntry = {
+  id: string
+  to: string
+  subject: string
+  html: string
+  createdAt: string
+  sent: boolean
+  error?: string
+}

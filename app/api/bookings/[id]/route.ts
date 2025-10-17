@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server"
-import { bookingStore } from "@/lib/bookings-store"
+import { updateBookingStatus, ensureIndexes } from "@/lib/mongodb-models"
 import type { BookingStatus } from "@/lib/types"
 import { sendCustomerStatusEmail } from "@/lib/email"
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
+    await ensureIndexes()
     const body = (await req.json()) as { status?: BookingStatus }
     if (!body?.status) {
       return NextResponse.json({ error: "Missing status" }, { status: 400 })
@@ -12,7 +13,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     if (!["pending", "accepted", "cancelled"].includes(body.status)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 })
     }
-    const updated = bookingStore.updateStatus(params.id, body.status)
+
+    const updated = await updateBookingStatus(params.id, body.status)
     if (!updated) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
@@ -30,7 +32,8 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }).catch(() => {})
 
     return NextResponse.json({ booking: updated })
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
+  } catch (error) {
+    console.error("Error updating booking:", error)
+    return NextResponse.json({ error: "Invalid JSON or database error" }, { status: 400 })
   }
 }
