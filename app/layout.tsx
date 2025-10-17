@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { SiteHeader } from "@/components/site-header"
 import { Suspense } from "react"
+import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
   title: "Lepro Home Services | Canada",
@@ -26,7 +27,7 @@ export default function RootLayout({
       >
         <Suspense fallback={<div className="p-10 text-center text-gray-500">Loading...</div>}>
           <SiteHeader />
-
+<Toaster />
           {/* Page transition animation */}
           <main className="pt-20 animate-fade-in-up">{children}</main>
 

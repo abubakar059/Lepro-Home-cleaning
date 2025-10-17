@@ -1,247 +1,87 @@
 "use client"
 
-import { useState } from "react"
 import { motion } from "framer-motion"
+import { ScheduleForm } from "@/components/schedule-form"
+import { FaWhatsapp } from "react-icons/fa"
+import Link from "next/link"
+import { useToast } from "@/hooks/use-toast"
 
-interface ScheduleFormProps {
-  onSuccess?: () => void
-  onError?: (message: string) => void
-}
+export default function SchedulePage() {
+  const { toast } = useToast()
 
-export default function ScheduleForm({ onSuccess, onError }: ScheduleFormProps) {
-  const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    service: "",
-    location: "",
-    date: "",
-    time: "",
-    message: ""
-  })
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
+  // ✅ Called when booking is successful
+  const handleSuccess = () => {
+    toast({
+      title: "Booking submitted successfully!",
+      description:
+        "We've received your booking request. Please check your email for confirmation.",
     })
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-
-    try {
-      const response = await fetch("/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || "Failed to submit booking")
-      }
-
-      // Clear form on success
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        service: "",
-        location: "",
-        date: "",
-        time: "",
-        message: ""
-      })
-
-      // Call success callback
-      onSuccess?.()
-    } catch (error) {
-      console.error("Booking submission error:", error)
-      onError?.(error instanceof Error ? error.message : "Failed to submit booking. Please try again.")
-    } finally {
-      setLoading(false)
-    }
+  // ❌ Called when booking fails
+  const handleError = (message: string) => {
+    toast({
+      title: "Booking failed",
+      description: message || "Something went wrong. Please try again.",
+      variant: "destructive",
+    })
   }
 
   return (
-    <motion.form
-      onSubmit={handleSubmit}
-      className="bg-white shadow-xl rounded-2xl p-8 space-y-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
+    <motion.div
+      className="mx-auto max-w-3xl px-4 sm:px-6 py-12 md:py-16"
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
     >
-      {/* Name */}
-      <div>
-        <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
-          Full Name *
-        </label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          required
-          disabled={loading}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          placeholder="John Doe"
-        />
-      </div>
-
-      {/* Email */}
-      <div>
-        <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-          Email Address *
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          disabled={loading}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          placeholder="john@example.com"
-        />
-      </div>
-
-      {/* Phone */}
-      <div>
-        <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-          Phone Number
-        </label>
-        <input
-          type="tel"
-          id="phone"
-          name="phone"
-          value={formData.phone}
-          onChange={handleChange}
-          disabled={loading}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          placeholder="+1 (613) 716-1606"
-        />
-      </div>
-
-      {/* Service */}
-      <div>
-        <label htmlFor="service" className="block text-sm font-semibold text-gray-700 mb-2">
-          Service *
-        </label>
-        <select
-          id="service"
-          name="service"
-          value={formData.service}
-          onChange={handleChange}
-          required
-          disabled={loading}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <option value="">Select a service</option>
-          <option value="plumbing">Plumbing</option>
-          <option value="electrical">Electrical</option>
-          <option value="hvac">HVAC</option>
-          <option value="carpentry">Carpentry</option>
-          <option value="painting">Painting</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-
-      {/* Location */}
-      <div>
-        <label htmlFor="location" className="block text-sm font-semibold text-gray-700 mb-2">
-          Location *
-        </label>
-        <input
-          type="text"
-          id="location"
-          name="location"
-          value={formData.location}
-          onChange={handleChange}
-          required
-          disabled={loading}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          placeholder="Ottawa, ON"
-        />
-      </div>
-
-      {/* Date & Time */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <label htmlFor="date" className="block text-sm font-semibold text-gray-700 mb-2">
-            Preferred Date *
-          </label>
-          <input
-            type="date"
-            id="date"
-            name="date"
-            value={formData.date}
-            onChange={handleChange}
-            required
-            disabled={loading}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-        </div>
-        <div>
-          <label htmlFor="time" className="block text-sm font-semibold text-gray-700 mb-2">
-            Preferred Time *
-          </label>
-          <input
-            type="time"
-            id="time"
-            name="time"
-            value={formData.time}
-            onChange={handleChange}
-            required
-            disabled={loading}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          />
-        </div>
-      </div>
-
-      {/* Message */}
-      <div>
-        <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
-          Additional Details
-        </label>
-        <textarea
-          id="message"
-          name="message"
-          value={formData.message}
-          onChange={handleChange}
-          rows={4}
-          disabled={loading}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none disabled:opacity-50 disabled:cursor-not-allowed"
-          placeholder="Tell us more about your service needs..."
-        />
-      </div>
-
-      {/* Submit Button */}
-      <motion.button
-        type="submit"
-        disabled={loading}
-        whileHover={!loading ? { scale: 1.02 } : {}}
-        whileTap={!loading ? { scale: 0.98 } : {}}
-        className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold py-4 px-6 rounded-lg shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+      {/* 🧭 Animated Gradient Title */}
+      <motion.h1
+        className="text-4xl md:text-5xl font-extrabold text-center bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2, duration: 0.8 }}
       >
-        {loading ? (
-          <>
-            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Submitting...
-          </>
-        ) : (
-          "Submit Booking Request"
-        )}
-      </motion.button>
-    </motion.form>
+        Schedule Service Online
+      </motion.h1>
+
+      {/* 💬 Subtitle */}
+      <motion.p
+        className="text-center text-gray-600 mt-3 text-lg max-w-2xl mx-auto leading-relaxed"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4, duration: 0.8 }}
+      >
+        Choose your service, date, and time. We’ll send a confirmation to your email and can follow up by phone or
+        WhatsApp if you prefer. Available across Canada.
+      </motion.p>
+
+      {/* 📅 Schedule Form */}
+      <motion.div
+        className="mt-10"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.6, duration: 0.7 }}
+      >
+        {/* Pass handlers to form */}
+        <ScheduleForm onSuccess={handleSuccess} onError={handleError} />
+      </motion.div>
+
+      {/* 💚 WhatsApp Contact Button */}
+      <motion.div
+        className="mt-8 text-center"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1, duration: 0.6 }}
+      >
+        <Link
+          href="https://wa.me/16137161606"
+          target="_blank"
+          className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-5 rounded-lg shadow-lg transition-all duration-300"
+        >
+          <FaWhatsapp className="text-2xl" />
+          Chat on WhatsApp
+        </Link>
+      </motion.div>
+    </motion.div>
   )
 }

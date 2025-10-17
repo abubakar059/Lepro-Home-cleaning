@@ -11,7 +11,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { services } from "@/lib/services"
 
-export function ScheduleForm() {
+type ScheduleFormProps = {
+  onSuccess?: () => void
+  onError?: (message: string) => void
+}
+
+export function ScheduleForm({ onSuccess, onError }: ScheduleFormProps) {
   const { toast } = useToast()
   const search = useSearchParams()
   const prefilledService = search.get("service") ?? ""
@@ -22,7 +27,7 @@ export function ScheduleForm() {
   const [time, setTime] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
-  const [location, setLocation] = useState("") // ✅ new location field
+  const [location, setLocation] = useState("")
   const [useWhatsApp, setUseWhatsApp] = useState(false)
   const [name, setName] = useState("")
   const [submitting, setSubmitting] = useState(false)
@@ -47,18 +52,24 @@ export function ScheduleForm() {
           date,
           time,
           location,
-          service, // include selected service
+          service,
           whatsapp: useWhatsApp,
         }),
       })
+
       if (!res.ok) {
         const j = await res.json().catch(() => ({}))
         throw new Error(j?.error || "Failed to create booking")
       }
+
+      // ✅ Success handler
       toast({
         title: `Thanks, ${name}!`,
-        description: `We've received your request for ${service} on ${date} at ${time} (${location}). You'll get an email once it's approved.`,
+        description: `We've received your request for ${service} on ${date} at ${time} (${location}).`,
       })
+      onSuccess?.()
+
+      // Clear form
       setName("")
       setDate("")
       setTime("")
@@ -67,7 +78,9 @@ export function ScheduleForm() {
       setLocation("")
       setUseWhatsApp(false)
     } catch (err: any) {
-      toast({ title: "Could not book", description: err.message ?? "Please try again.", variant: "destructive" })
+      const msg = err.message ?? "Please try again."
+      toast({ title: "Could not book", description: msg, variant: "destructive" })
+      onError?.(msg)
     } finally {
       setSubmitting(false)
     }
@@ -149,7 +162,7 @@ export function ScheduleForm() {
             />
           </div>
 
-          {/* Location field */}
+          {/* Location */}
           <div className="grid gap-2">
             <Label htmlFor="location">Service Location</Label>
             <Input
@@ -188,7 +201,7 @@ export function ScheduleForm() {
             <Label htmlFor="use-whatsapp">I prefer updates via WhatsApp</Label>
           </div>
 
-          {/* Submit button with glow effect */}
+          {/* Submit button */}
           <Button
             type="submit"
             className="relative overflow-hidden transition-all bg-primary text-white hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]"
