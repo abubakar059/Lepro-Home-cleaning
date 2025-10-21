@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { createBooking, getBookings, ensureIndexes, deleteAllBookings } from "@/lib/mongodb-models"
+import { createBooking, getBookings, ensureIndexes } from "@/lib/mongodb-models"
 import type { Booking } from "@/lib/types"
 import { sendAdminNewBookingEmail } from "@/lib/email"
 
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
   try {
     await ensureIndexes()
     const data = (await req.json()) as Partial<Booking>
-    const { name, email, phone, date, time, whatsapp = false, service, location } = data
+    const { name, email, phone, date, time, whatsapp = false, service, location, paymentMethod } = data
 
     if (!name || !email || !date || !time) {
       return NextResponse.json({ error: "Missing required fields: name, email, date, time" }, { status: 400 })
@@ -33,9 +33,10 @@ export async function POST(req: Request) {
       whatsapp: Boolean(whatsapp),
       service,
       location,
+      paymentMethod: paymentMethod ?? "not-specified",
     })
 
-    // Fire-and-forget admin email
+    // Fire-and-forget admin email (do not block response)
     sendAdminNewBookingEmail({
       id: created.id,
       name: created.name,
@@ -51,17 +52,5 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Error creating booking:", error)
     return NextResponse.json({ error: "Invalid JSON or database error" }, { status: 400 })
-  }
-}
-
-// ✅ DELETE: clear all bookings
-export async function DELETE() {
-  try {
-    await ensureIndexes()
-    await deleteAllBookings() // implement this in mongodb-models.ts
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error("Error deleting bookings:", error)
-    return NextResponse.json({ error: "Failed to delete bookings" }, { status: 500 })
   }
 }

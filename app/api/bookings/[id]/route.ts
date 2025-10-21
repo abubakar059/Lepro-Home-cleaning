@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server"
-import { updateBookingStatus, ensureIndexes } from "@/lib/mongodb-models"
+import { updateBookingStatus, deleteBooking, ensureIndexes } from "@/lib/mongodb-models"
 import type { BookingStatus } from "@/lib/types"
 import { sendCustomerStatusEmail } from "@/lib/email"
 
-export async function PATCH(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
   try {
     // ✅ Await params to avoid Next.js dynamic API route error
     const { id } = await context.params
@@ -44,9 +41,23 @@ export async function PATCH(
     return NextResponse.json({ booking: updated })
   } catch (error) {
     console.error("Error updating booking:", error)
-    return NextResponse.json(
-      { error: "Invalid JSON or database error" },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: "Invalid JSON or database error" }, { status: 400 })
+  }
+}
+
+export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await context.params
+    await ensureIndexes()
+
+    const deleted = await deleteBooking(id)
+    if (!deleted) {
+      return NextResponse.json({ error: "Booking not found" }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, message: "Booking deleted" })
+  } catch (error) {
+    console.error("Error deleting booking:", error)
+    return NextResponse.json({ error: "Failed to delete booking" }, { status: 500 })
   }
 }

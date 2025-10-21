@@ -1,6 +1,7 @@
 import { MongoClient, type Db } from "mongodb"
 
-const MONGODB_URI ="mongodb+srv://abubakar:Ejkx3eEnPwymvJZ3@cluster0.6qdotpy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+const MONGODB_URI =
+  "mongodb+srv://abubakar:Ejkx3eEnPwymvJZ3@cluster0.6qdotpy.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 const DB_NAME = "leprohome"
 
 let cachedClient: MongoClient | null = null
@@ -39,6 +40,11 @@ export async function ensureIndexes() {
   await bookingsCollection.createIndex({ createdAt: -1 })
   await bookingsCollection.createIndex({ email: 1 })
   await bookingsCollection.createIndex({ status: 1 })
+
+  const quotesCollection = db.collection("quotes")
+  await quotesCollection.createIndex({ createdAt: -1 })
+  await quotesCollection.createIndex({ email: 1 })
+  await quotesCollection.createIndex({ status: 1 })
 
   // Email logs indexes
   const emailLogsCollection = db.collection("email_logs")

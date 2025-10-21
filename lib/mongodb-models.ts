@@ -1,12 +1,10 @@
 import { ObjectId } from "mongodb"
 import { getDatabase, ensureIndexes } from "./db"
-import type { Booking, BookingStatus, EmailLogEntry } from "./types"
+import type { Booking, BookingStatus, EmailLogEntry, Quote, QuoteStatus } from "./types"
 
 // ============ BOOKINGS COLLECTION ============
 
-export async function createBooking(
-  input: Omit<Booking, "id" | "createdAt" | "status">
-): Promise<Booking> {
+export async function createBooking(input: Omit<Booking, "id" | "createdAt" | "status">): Promise<Booking> {
   const db = await getDatabase()
   const collection = db.collection("bookings")
 
@@ -43,6 +41,7 @@ export async function getBookings(): Promise<Booking[]> {
     status: b.status,
     service: b.service,
     location: b.location,
+    paymentMethod: b.paymentMethod,
   }))
 }
 
@@ -66,25 +65,22 @@ export async function getBookingById(id: string): Promise<Booking | null> {
       status: booking.status,
       service: booking.service,
       location: booking.location,
+      paymentMethod: booking.paymentMethod,
     }
   } catch {
     return null
   }
 }
 
-export async function updateBookingStatus(
-  id: string,
-  status: BookingStatus
-): Promise<Booking | null> {
+export async function updateBookingStatus(id: string, status: BookingStatus): Promise<Booking | null> {
   const db = await getDatabase()
   const collection = db.collection("bookings")
 
   try {
-    // ✅ Correct ObjectId usage here
     const result = await collection.findOneAndUpdate(
       { _id: new ObjectId(id) },
       { $set: { status } },
-      { returnDocument: "after" }
+      { returnDocument: "after" },
     )
     if (!result) return null
 
@@ -101,6 +97,7 @@ export async function updateBookingStatus(
       status: booking.status,
       service: booking.service,
       location: booking.location,
+      paymentMethod: booking.paymentMethod,
     }
   } catch (err) {
     console.error("Update failed:", err)
@@ -108,11 +105,174 @@ export async function updateBookingStatus(
   }
 }
 
+export async function deleteBooking(id: string): Promise<boolean> {
+  const db = await getDatabase()
+  const collection = db.collection("bookings")
+
+  try {
+    const result = await collection.deleteOne({ _id: new ObjectId(id) })
+    return result.deletedCount > 0
+  } catch (err) {
+    console.error("Delete failed:", err)
+    return false
+  }
+}
+
+// ============ QUOTES COLLECTION ============
+
+export async function createQuote(input: Omit<Quote, "id" | "createdAt" | "status">): Promise<Quote> {
+  const db = await getDatabase()
+  const collection = db.collection("quotes")
+
+  const quote = {
+    _id: new ObjectId(),
+    ...input,
+    createdAt: new Date().toISOString(),
+    status: "pending" as QuoteStatus,
+  }
+
+  await collection.insertOne(quote)
+
+  return {
+    id: quote._id.toString(),
+    ...quote,
+  } as Quote
+}
+
+export async function getQuotes(): Promise<Quote[]> {
+  const db = await getDatabase()
+  const collection = db.collection("quotes")
+
+  const quotes = await collection.find({}).sort({ createdAt: -1 }).toArray()
+
+  return quotes.map((q: any) => ({
+    id: q._id.toString(),
+    name: q.name,
+    email: q.email,
+    phone: q.phone,
+    address: q.address,
+    serviceArea: q.serviceArea,
+    serviceType: q.serviceType,
+    propertyType: q.propertyType,
+    squareFootage: q.squareFootage,
+    adults: q.adults,
+    kids: q.kids,
+    pets: q.pets,
+    serviceLevel: q.serviceLevel,
+    kitchens: q.kitchens,
+    fullBathrooms: q.fullBathrooms,
+    halfBathrooms: q.halfBathrooms,
+    walkInShowers: q.walkInShowers,
+    largeOvalTubs: q.largeOvalTubs,
+    doubleSinks: q.doubleSinks,
+    basement: q.basement,
+    dusting: q.dusting,
+    comments: q.comments,
+    createdAt: q.createdAt,
+    status: q.status,
+  }))
+}
+
+export async function getQuoteById(id: string): Promise<Quote | null> {
+  const db = await getDatabase()
+  const collection = db.collection("quotes")
+
+  try {
+    const quote = await collection.findOne({ _id: new ObjectId(id) })
+    if (!quote) return null
+
+    return {
+      id: quote._id.toString(),
+      name: quote.name,
+      email: quote.email,
+      phone: quote.phone,
+      address: quote.address,
+      serviceArea: quote.serviceArea,
+      serviceType: quote.serviceType,
+      propertyType: quote.propertyType,
+      squareFootage: quote.squareFootage,
+      adults: quote.adults,
+      kids: quote.kids,
+      pets: quote.pets,
+      serviceLevel: quote.serviceLevel,
+      kitchens: quote.kitchens,
+      fullBathrooms: quote.fullBathrooms,
+      halfBathrooms: quote.halfBathrooms,
+      walkInShowers: quote.walkInShowers,
+      largeOvalTubs: quote.largeOvalTubs,
+      doubleSinks: quote.doubleSinks,
+      basement: quote.basement,
+      dusting: quote.dusting,
+      comments: quote.comments,
+      createdAt: quote.createdAt,
+      status: quote.status,
+    }
+  } catch {
+    return null
+  }
+}
+
+export async function updateQuoteStatus(id: string, status: QuoteStatus): Promise<Quote | null> {
+  const db = await getDatabase()
+  const collection = db.collection("quotes")
+
+  try {
+    const result = await collection.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: { status } },
+      { returnDocument: "after" },
+    )
+    if (!result) return null
+
+    const quote = result
+    return {
+      id: quote._id.toString(),
+      name: quote.name,
+      email: quote.email,
+      phone: quote.phone,
+      address: quote.address,
+      serviceArea: quote.serviceArea,
+      serviceType: quote.serviceType,
+      propertyType: quote.propertyType,
+      squareFootage: quote.squareFootage,
+      adults: quote.adults,
+      kids: quote.kids,
+      pets: quote.pets,
+      serviceLevel: quote.serviceLevel,
+      kitchens: quote.kitchens,
+      fullBathrooms: quote.fullBathrooms,
+      halfBathrooms: quote.halfBathrooms,
+      walkInShowers: quote.walkInShowers,
+      largeOvalTubs: quote.largeOvalTubs,
+      doubleSinks: quote.doubleSinks,
+      basement: quote.basement,
+      dusting: quote.dusting,
+      comments: quote.comments,
+      createdAt: quote.createdAt,
+      status: quote.status,
+    }
+  } catch (err) {
+    console.error("Update failed:", err)
+    return null
+  }
+}
+
+export async function deleteQuote(id: string): Promise<boolean> {
+  const db = await getDatabase()
+  const collection = db.collection("quotes")
+
+  try {
+    const result = await collection.deleteOne({ _id: new ObjectId(id) })
+    return result.deletedCount > 0
+  } catch (err) {
+    console.error("Delete failed:", err)
+    return false
+  }
+}
+
 // ============ EMAIL LOG COLLECTION ============
 
-export async function createEmailLog(
-  input: Omit<EmailLogEntry, "id" | "createdAt">
-): Promise<EmailLogEntry> {
+export async function createEmailLog(input: Omit<EmailLogEntry, "id" | "createdAt">): Promise<EmailLogEntry> {
   const db = await getDatabase()
   const collection = db.collection("email_logs")
 
@@ -150,12 +310,6 @@ export async function getEmailLogs(): Promise<EmailLogEntry[]> {
 export async function clearEmailLogs(): Promise<void> {
   const db = await getDatabase()
   const collection = db.collection("email_logs")
-  await collection.deleteMany({})
-}
-// ✅ Clear all bookings
-export async function deleteAllBookings(): Promise<void> {
-  const db = await getDatabase()
-  const collection = db.collection("bookings")
   await collection.deleteMany({})
 }
 

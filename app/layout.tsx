@@ -6,14 +6,23 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { SiteHeader } from "@/components/site-header"
 import { Suspense } from "react"
-import { Toaster } from "@/components/ui/toaster" // ✅ Toast popup provider
+import { Toaster } from "@/components/ui/toaster" 
 
 export const metadata: Metadata = {
   title: "Lepro Home Services | Canada",
   description:
     "Lepro Home Services — Professional indoor, outdoor, residential, commercial, and window cleaning across Canada. Book online with flexible date and time.",
+  icons: {
+    icon: [
+      { url: "/images/favicon.png", type: "image/png", sizes: "512x512" },
+      { url: "/images/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "/images/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+    ],
+    apple: { url: "/images/logo.png", sizes: "180x180", type: "image/png" },
+  },
   generator: "v0.app",
 }
+
 
 export default function RootLayout({
   children,

@@ -10,6 +10,15 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import type { Booking, BookingStatus, Quote, QuoteStatus } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const ADMIN_USERNAME = "admin"
 const ADMIN_PASSWORD = "admin123"
@@ -125,10 +134,8 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <div className="mt-10 grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <QuotesPanel />
-        </div>
+      <div className="mt-10 grid gap-8">
+        <QuotesPanel />
       </div>
     </div>
   )
@@ -194,6 +201,7 @@ function BookingsPanel() {
   const { data, isLoading, mutate } = useSWR<BookingResponse>("/api/bookings", fetcher, { refreshInterval: 4000 })
   const [statusFilter, setStatusFilter] = useState<BookingStatus | "all">("all")
   const [q, setQ] = useState("")
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string }>({ open: false, id: "" })
 
   const items = useMemo(() => {
     const src = data?.bookings ?? []
@@ -223,119 +231,141 @@ function BookingsPanel() {
     }
   }
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Bookings</CardTitle>
-        <CardDescription>Accept or cancel incoming requests</CardDescription>
-      </CardHeader>
-      <CardContent>
-<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
-  <div className="flex items-center gap-2">
-    <select
-      value={statusFilter}
-      onChange={(e) => setStatusFilter(e.target.value as any)}
-      className="h-9 rounded-md border bg-transparent px-3"
-      aria-label="Filter by status"
-    >
-      <option value="all">All</option>
-      <option value="pending">Pending</option>
-      <option value="accepted">Accepted</option>
-      <option value="cancelled">Cancelled</option>
-    </select>
-    <Button
-      variant="secondary"
-      onClick={() => {
-        setStatusFilter("all")
-        setQ("")
-      }}
-    >
-      Reset
-    </Button>
+  async function handleDelete(id: string) {
+    const res = await fetch(`/api/bookings/${id}`, {
+      method: "DELETE",
+    })
+    if (res.ok) {
+      await mutate()
+      setDeleteConfirm({ open: false, id: "" })
+    }
+  }
 
-    {/* ✅ Clear All Bookings Button */}
-    <Button
-      variant="destructive"
-      onClick={async () => {
-        if (!confirm("Are you sure you want to delete all bookings? This action cannot be undone.")) return
-        await fetch("/api/bookings", { method: "DELETE" })
-        await mutate()
-      }}
-    >
-      Clear All
-    </Button>
-  </div>
-  <div className="w-full md:w-64">
-    <Input placeholder="Search name, email, service..." value={q} onChange={(e) => setQ(e.target.value)} />
-  </div>
-</div>
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading bookings...</p>
-        ) : items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No bookings match your filters.</p>
-        ) : (
-          <div className="mt-2 border rounded-lg overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Date/Time</TableHead>
-                  <TableHead>WhatsApp</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {items.map((b) => (
-                  <TableRow key={b.id}>
-                    <TableCell className="font-medium">{b.name}</TableCell>
-                    <TableCell>
-                      <div className="text-sm">{b.email}</div>
-                      <div className="text-xs text-muted-foreground">{b.phone}</div>
-                    </TableCell>
-                    <TableCell>{b.service || "-"}</TableCell>
-                    <TableCell className="max-w-[220px] truncate" title={b.location || "-"}>
-                      {b.location || "-"}
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">{b.date}</div>
-                      <div className="text-xs text-muted-foreground">{b.time}</div>
-                    </TableCell>
-                    <TableCell>{b.whatsapp ? "Yes" : "No"}</TableCell>
-                    <TableCell>
-                      <StatusBadge status={b.status} type="booking" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-2 justify-end">
-                        <Button
-                          size="sm"
-                          className="btn-glow"
-                          disabled={b.status === "accepted"}
-                          onClick={() => updateStatus(b.id, "accepted")}
-                        >
-                          Accept
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => updateStatus(b.id, "cancelled")}
-                          disabled={b.status === "cancelled"}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Bookings</CardTitle>
+          <CardDescription>Accept or cancel incoming requests</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                className="h-9 rounded-md border bg-transparent px-3"
+                aria-label="Filter by status"
+              >
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="accepted">Accepted</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <Button variant="secondary" onClick={() => setStatusFilter("all")}>
+                Reset
+              </Button>
+            </div>
+            <div className="w-full md:w-64">
+              <Input placeholder="Search name, email, service..." value={q} onChange={(e) => setQ(e.target.value)} />
+            </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Loading bookings...</p>
+          ) : items.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No bookings match your filters.</p>
+          ) : (
+            <div className="mt-2 border rounded-lg overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Date/Time</TableHead>
+                    <TableHead>WhatsApp</TableHead>
+                    <TableHead>Payment</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {items.map((b) => (
+                    <TableRow key={b.id}>
+                      <TableCell className="font-medium">{b.name}</TableCell>
+                      <TableCell>
+                        <div className="text-sm">{b.email}</div>
+                        <div className="text-xs text-muted-foreground">{b.phone}</div>
+                      </TableCell>
+                      <TableCell>{b.service || "-"}</TableCell>
+                      <TableCell className="max-w-[220px] truncate" title={b.location || "-"}>
+                        {b.location || "-"}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">{b.date}</div>
+                        <div className="text-xs text-muted-foreground">{b.time}</div>
+                      </TableCell>
+                      <TableCell>{b.whatsapp ? "Yes" : "No"}</TableCell>
+                      <TableCell className="capitalize text-sm">{b.paymentMethod || "-"}</TableCell>
+                      <TableCell>
+                        <StatusBadge status={b.status} type="booking" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            size="sm"
+                            className="btn-glow"
+                            disabled={b.status === "accepted"}
+                            onClick={() => updateStatus(b.id, "accepted")}
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => updateStatus(b.id, "cancelled")}
+                            disabled={b.status === "cancelled"}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setDeleteConfirm({ open: true, id: b.id })}
+                            title="Delete booking"
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={deleteConfirm.open} onOpenChange={(open) => setDeleteConfirm({ ...deleteConfirm, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Booking</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this booking? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex gap-2 justify-end">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleDelete(deleteConfirm.id)} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
 
@@ -343,6 +373,7 @@ function QuotesPanel() {
   const { data, isLoading, mutate } = useSWR<QuoteResponse>("/api/quotes", fetcher, { refreshInterval: 4000 })
   const [statusFilter, setStatusFilter] = useState<QuoteStatus | "all">("all")
   const [q, setQ] = useState("")
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string }>({ open: false, id: "" })
 
   const items = useMemo(() => {
     const src = data?.quotes ?? []
@@ -371,100 +402,157 @@ function QuotesPanel() {
     }
   }
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Quote Requests</CardTitle>
-        <CardDescription>Manage incoming quote requests</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="h-9 rounded-md border bg-transparent px-3"
-              aria-label="Filter by status"
-            >
-              <option value="all">All</option>
-              <option value="pending">Pending</option>
-              <option value="reviewed">Reviewed</option>
-              <option value="contacted">Contacted</option>
-            </select>
-            <Button variant="secondary" onClick={() => setStatusFilter("all")}>
-              Reset
-            </Button>
-          </div>
-          <div className="w-full md:w-64">
-            <Input placeholder="Search name, email, service area..." value={q} onChange={(e) => setQ(e.target.value)} />
-          </div>
-        </div>
+  async function handleDelete(id: string) {
+    const res = await fetch(`/api/quotes/${id}`, {
+      method: "DELETE",
+    })
+    if (res.ok) {
+      await mutate()
+      setDeleteConfirm({ open: false, id: "" })
+    }
+  }
 
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Loading quotes...</p>
-        ) : items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No quotes match your filters.</p>
-        ) : (
-          <div className="mt-2 border rounded-lg overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>Service Area</TableHead>
-                  <TableHead>Property Type</TableHead>
-                  <TableHead>Sq Ft</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {items.map((quote) => (
-                  <TableRow key={quote.id}>
-                    <TableCell className="font-medium">{quote.name || "-"}</TableCell>
-                    <TableCell>
-                      <a href={`mailto:${quote.email}`} className="text-sky-600 hover:underline">
-                        {quote.email}
-                      </a>
-                    </TableCell>
-                    <TableCell>{quote.phone || "-"}</TableCell>
-                    <TableCell>{quote.serviceArea}</TableCell>
-                    <TableCell className="capitalize">{quote.propertyType}</TableCell>
-                    <TableCell>{quote.squareFootage}</TableCell>
-                    <TableCell className="text-sm">{new Date(quote.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>
-                      <StatusBadge status={quote.status} type="quote" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-2 justify-end">
-                        <Button
-                          size="sm"
-                          className="btn-glow"
-                          disabled={quote.status === "reviewed"}
-                          onClick={() => updateStatus(quote.id, "reviewed")}
-                        >
-                          Review
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          disabled={quote.status === "contacted"}
-                          onClick={() => updateStatus(quote.id, "contacted")}
-                        >
-                          Contacted
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>Quote Requests</CardTitle>
+          <CardDescription>Manage incoming quote requests with all property details</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+                className="h-9 rounded-md border bg-transparent px-3"
+                aria-label="Filter by status"
+              >
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="reviewed">Reviewed</option>
+                <option value="contacted">Contacted</option>
+              </select>
+              <Button variant="secondary" onClick={() => setStatusFilter("all")}>
+                Reset
+              </Button>
+            </div>
+            <div className="w-full md:w-64">
+              <Input
+                placeholder="Search name, email, service area..."
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+              />
+            </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Loading quotes...</p>
+          ) : items.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No quotes match your filters.</p>
+          ) : (
+            <div className="mt-2 border rounded-lg overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Address</TableHead>
+                    <TableHead>Service Area</TableHead>
+                    <TableHead>Property Type</TableHead>
+                    <TableHead>Sq Ft</TableHead>
+                    <TableHead>Service Level</TableHead>
+                    <TableHead>Bathrooms</TableHead>
+                    <TableHead>Comments</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {items.map((quote) => (
+                    <TableRow key={quote.id}>
+                      <TableCell className="font-medium">{quote.name || "-"}</TableCell>
+                      <TableCell>
+                        <a href={`mailto:${quote.email}`} className="text-sky-600 hover:underline text-sm">
+                          {quote.email}
+                        </a>
+                      </TableCell>
+                      <TableCell className="text-sm">{quote.phone || "-"}</TableCell>
+                      <TableCell className="text-sm max-w-[150px] truncate" title={quote.address || "-"}>
+                        {quote.address || "-"}
+                      </TableCell>
+                      <TableCell className="text-sm">{quote.serviceArea}</TableCell>
+                      <TableCell className="capitalize text-sm">{quote.propertyType}</TableCell>
+                      <TableCell className="text-sm">{quote.squareFootage}</TableCell>
+                      <TableCell className="capitalize text-sm">{quote.serviceLevel}</TableCell>
+                      <TableCell className="text-sm">
+                        {quote.fullBathrooms}/{quote.halfBathrooms}
+                      </TableCell>
+                      <TableCell className="text-sm max-w-[150px] truncate" title={quote.comments || "-"}>
+                        {quote.comments || "-"}
+                      </TableCell>
+                      <TableCell className="text-sm">{new Date(quote.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell>
+                        <StatusBadge status={quote.status} type="quote" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-2 justify-end flex-wrap">
+                          <Button
+                            size="sm"
+                            className="btn-glow"
+                            disabled={quote.status === "reviewed"}
+                            onClick={() => updateStatus(quote.id, "reviewed")}
+                            title="Mark as reviewed"
+                          >
+                            ✓ Review
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            disabled={quote.status === "contacted"}
+                            onClick={() => updateStatus(quote.id, "contacted")}
+                            title="Mark as contacted"
+                          >
+                            ✓ Contacted
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setDeleteConfirm({ open: true, id: quote.id })}
+                            title="Delete quote"
+                          >
+                            Delete
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={deleteConfirm.open} onOpenChange={(open) => setDeleteConfirm({ ...deleteConfirm, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Quote</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this quote request? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex gap-2 justify-end">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleDelete(deleteConfirm.id)} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
 

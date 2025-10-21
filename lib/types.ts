@@ -12,6 +12,7 @@ export interface Booking {
   status: BookingStatus
   service?: string
   location?: string
+  paymentMethod?: string
 }
 
 export type QuoteStatus = "pending" | "reviewed" | "contacted"
@@ -43,13 +44,12 @@ export interface Quote {
   status: QuoteStatus
 }
 
-// ===== NEW TYPE: Email log entry =====
 export interface EmailLogEntry {
-  id?: string
+  id: string
   to: string
   subject: string
-  html?: string
-  createdAt?: string
+  html: string
+  createdAt: string
   sent: boolean
   error?: string
 }

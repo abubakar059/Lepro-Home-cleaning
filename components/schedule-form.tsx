@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { services } from "@/lib/services"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 type ScheduleFormProps = {
   onSuccess?: () => void
@@ -30,6 +31,7 @@ export function ScheduleForm({ onSuccess, onError }: ScheduleFormProps) {
   const [location, setLocation] = useState("")
   const [useWhatsApp, setUseWhatsApp] = useState(false)
   const [name, setName] = useState("")
+  const [paymentMethod, setPaymentMethod] = useState("credit-card")
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -54,6 +56,7 @@ export function ScheduleForm({ onSuccess, onError }: ScheduleFormProps) {
           location,
           service,
           whatsapp: useWhatsApp,
+          paymentMethod,
         }),
       })
 
@@ -77,6 +80,7 @@ export function ScheduleForm({ onSuccess, onError }: ScheduleFormProps) {
       setPhone("")
       setLocation("")
       setUseWhatsApp(false)
+      setPaymentMethod("credit-card")
     } catch (err: any) {
       const msg = err.message ?? "Please try again."
       toast({ title: "Could not book", description: msg, variant: "destructive" })
@@ -188,6 +192,22 @@ export function ScheduleForm({ onSuccess, onError }: ScheduleFormProps) {
               required
               className="focus:ring-2 focus:ring-primary/40 transition-all"
             />
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="payment-method">Payment Method</Label>
+            <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+              <SelectTrigger id="payment-method" className="focus:ring-2 focus:ring-primary/40 transition-all">
+                <SelectValue placeholder="Select payment method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="credit-card">Credit Card</SelectItem>
+                <SelectItem value="debit-card">Debit Card</SelectItem>
+                <SelectItem value="bank-transfer">Bank Transfer</SelectItem>
+                <SelectItem value="cash">Cash</SelectItem>
+                <SelectItem value="e-transfer">E-Transfer</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* WhatsApp checkbox */}

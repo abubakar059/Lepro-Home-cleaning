@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server"
-import { quoteStore } from "@/lib/quotes-store"
+import { createQuote, getQuotes, ensureIndexes } from "@/lib/mongodb-models"
 import type { Quote } from "@/lib/types"
 
 export async function GET() {
-  const items = quoteStore.list()
-  return NextResponse.json({ quotes: items })
+  try {
+    await ensureIndexes()
+    const quotes = await getQuotes()
+    return NextResponse.json({ quotes })
+  } catch (error) {
+    console.error("Error fetching quotes:", error)
+    return NextResponse.json({ error: "Failed to fetch quotes" }, { status: 500 })
+  }
 }
 
 export async function POST(req: Request) {
@@ -41,7 +47,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const created = quoteStore.add({
+    const created = await createQuote({
       name: name ?? "",
       email,
       phone: phone ?? "",
@@ -66,7 +72,8 @@ export async function POST(req: Request) {
     })
 
     return NextResponse.json({ quote: created }, { status: 201 })
-  } catch {
+  } catch (error) {
+    console.error("Error creating quote:", error)
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
   }
 }
