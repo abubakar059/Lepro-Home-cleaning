@@ -15,10 +15,7 @@ export default function PricingPage() {
         { name: "Studio/1 Bedroom Apartment", price: "$70.00" },
         { name: "2 Bedroom Apartment/House", price: "$95.00" },
         { name: "3 Bedroom House", price: "$125.00" },
-        { name: "Studio/1 Bedroom Apartment", price: "$75.00" },
-        { name: "2 Bedroom Apartment/House", price: "$100.00" },
-        { name: "3 Bedroom House", price: "$130.00" },
-
+        
       ],
     },
     {
@@ -30,11 +27,6 @@ export default function PricingPage() {
         { name: "Studio/2 Bedroom Apartment", price: "$140.00" },
         { name: "3 Bedroom Apartment/House", price: "$190.00" },
         { name: "4 Bedroom House", price: "$235.00" },
-
-        { name: "Studio/2 Bedroom Apartment", price: "$150.00" },
-        { name: "3 Bedroom Apartment/House", price: "$200.00" },
-        { name: "4 Bedroom House", price: "$250.00" },
-
       ],
     },
     {
@@ -85,9 +77,9 @@ export default function PricingPage() {
               className="mt-4 text-muted-foreground text-pretty max-w-2xl"
             >
               No hidden fees. No surprises. Just honest, competitive pricing for professional cleaning services across
-              Canada.
+              Ottawa,ON
             </motion.p>
-
+          
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -117,9 +109,10 @@ export default function PricingPage() {
             Our Pricing Plans
           </h2>
           <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
-            Choose the cleaning service that fits your needs. All prices are in CAD and include professional-grade
-            cleaning supplies.
-          </p>
+  Choose the cleaning service that fits your needs. All prices are in CAD and include professional-grade
+  cleaning supplies. <strong>Applicable taxes will be added at checkout.</strong>
+</p>
+
         </motion.div>
 
         <div className="space-y-16">

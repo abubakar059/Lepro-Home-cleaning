@@ -11,6 +11,39 @@ import { Card, CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { services } from "@/lib/services"
 
+// --- Components for Radio Buttons (assuming they are not in the provided imports) ---
+// For the purpose of this example, I'll use standard <input type="radio">
+// as the `radio` component wasn't provided, but I'll style it with existing classes.
+const RadioGroup = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex space-x-4">{children}</div>
+)
+const RadioItem = ({
+  id,
+  value,
+  checked,
+  onChange,
+  label,
+}: {
+  id: string
+  value: string
+  checked: boolean
+  onChange: (value: string) => void
+  label: string
+}) => (
+  <div className="flex items-center space-x-2">
+    <input
+      type="radio"
+      id={id}
+      value={value}
+      checked={checked}
+      onChange={() => onChange(value)}
+      className="h-4 w-4 border-gray-300 text-primary focus:ring-primary/40"
+    />
+    <Label htmlFor={id}>{label}</Label>
+  </div>
+)
+// ---------------------------------------------------------------------------------
+
 // -------------------------------
 // ScheduleForm Component
 // -------------------------------
@@ -34,6 +67,8 @@ function ScheduleForm({ onSuccess, onError }: ScheduleFormProps) {
   const [useWhatsApp, setUseWhatsApp] = useState(false)
   const [name, setName] = useState("")
   const [submitting, setSubmitting] = useState(false)
+  // New state for Payment Method
+  const [paymentMethod, setPaymentMethod] = useState("Cash") // Default to Cash
 
   useEffect(() => {
     if (prefilledService && serviceTitles.includes(prefilledService)) {
@@ -57,6 +92,8 @@ function ScheduleForm({ onSuccess, onError }: ScheduleFormProps) {
           location,
           service,
           whatsapp: useWhatsApp,
+          // Include new field
+          paymentMethod,
         }),
       })
 
@@ -82,6 +119,7 @@ function ScheduleForm({ onSuccess, onError }: ScheduleFormProps) {
       setPhone("")
       setLocation("")
       setUseWhatsApp(false)
+      setPaymentMethod("Cash") // Reset payment method
     } catch (err: any) {
       const msg = err.message ?? "Please try again."
 
@@ -121,8 +159,8 @@ function ScheduleForm({ onSuccess, onError }: ScheduleFormProps) {
             </select>
           </div>
 
-          {/* Date and time */}
-          <div className="grid gap-2 md:grid-cols-2">
+          {/* Date and time - Corrected to ensure proper grid layout */}
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="grid gap-2">
               <Label htmlFor="date">Preferred Date</Label>
               <Input
@@ -145,6 +183,20 @@ function ScheduleForm({ onSuccess, onError }: ScheduleFormProps) {
                 className="focus:ring-2 focus:ring-primary/40 transition-all"
               />
             </div>
+          </div>
+
+          {/* Name */}
+          <div className="grid gap-2">
+            <Label htmlFor="name">Full Name</Label>
+            <Input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Jane Doe"
+              required
+              className="focus:ring-2 focus:ring-primary/40 transition-all"
+            />
           </div>
 
           {/* Email */}
@@ -188,20 +240,35 @@ function ScheduleForm({ onSuccess, onError }: ScheduleFormProps) {
               className="focus:ring-2 focus:ring-primary/40 transition-all"
             />
           </div>
-
-          {/* Name */}
+          
+          {/* New: Payment Method with Radio Buttons */}
           <div className="grid gap-2">
-            <Label htmlFor="name">Full Name</Label>
-            <Input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Jane Doe"
-              required
-              className="focus:ring-2 focus:ring-primary/40 transition-all"
-            />
+            <Label>Payment Method</Label>
+            <RadioGroup>
+              <RadioItem
+                id="payment-cash"
+                value="Cash"
+                checked={paymentMethod === "Cash"}
+                onChange={setPaymentMethod}
+                label="Cash"
+              />
+              <RadioItem
+                id="payment-eft"
+                value="EFT"
+                checked={paymentMethod === "EFT"}
+                onChange={setPaymentMethod}
+                label="EFT"
+              />
+              <RadioItem
+                id="payment-card"
+                value="Card"
+                checked={paymentMethod === "Card"}
+                onChange={setPaymentMethod}
+                label="Card"
+              />
+            </RadioGroup>
           </div>
+          {/* End New: Payment Method */}
 
           {/* WhatsApp checkbox */}
           <div className="flex items-center gap-2">
@@ -228,9 +295,6 @@ function ScheduleForm({ onSuccess, onError }: ScheduleFormProps) {
   )
 }
 
-// -------------------------------
-// Default Page Export (Working)
-// -------------------------------
 export default function SchedulePage() {
   return (
     <div className="max-w-2xl mx-auto py-10 px-4">

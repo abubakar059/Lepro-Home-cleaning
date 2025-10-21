@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -114,7 +113,7 @@ export function QuoteForm() {
 
       setDialogType("success")
       setDialogMessage(
-        "Thank you! Your quote request has been submitted successfully. We'll review it and contact you soon.",
+        "Thank you! Your quote request has been submitted successfully. We'll review it and contact you soon."
       )
       setShowDialog(true)
 
@@ -152,8 +151,8 @@ export function QuoteForm() {
           <form ref={formRef} onSubmit={handleSubmit} className="space-y-8">
             {/* Contact Information */}
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-2">
                   <Label htmlFor="name" className="text-sky-700 font-medium">
                     Name (Optional)
                   </Label>
@@ -163,10 +162,10 @@ export function QuoteForm() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Your name"
-                    className="mt-2 border-sky-100 focus:border-sky-400"
+                    className="border-sky-100 focus:border-sky-400"
                   />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="address" className="text-sky-700 font-medium">
                     Address (Optional)
                   </Label>
@@ -176,10 +175,10 @@ export function QuoteForm() {
                     value={formData.address}
                     onChange={handleChange}
                     placeholder="Your address"
-                    className="mt-2 border-sky-100 focus:border-sky-400"
+                    className="border-sky-100 focus:border-sky-400"
                   />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="phone" className="text-sky-700 font-medium">
                     Phone Number (Optional)
                   </Label>
@@ -190,13 +189,13 @@ export function QuoteForm() {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="Your phone"
-                    className="mt-2 border-sky-100 focus:border-sky-400"
+                    className="border-sky-100 focus:border-sky-400"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
                   <Label htmlFor="email" className="text-sky-700 font-medium">
                     Email Address <span className="text-red-500">*</span>
                   </Label>
@@ -208,10 +207,10 @@ export function QuoteForm() {
                     onChange={handleChange}
                     placeholder="your@email.com"
                     required
-                    className="mt-2 border-sky-100 focus:border-sky-400"
+                    className="border-sky-100 focus:border-sky-400"
                   />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="serviceArea" className="text-sky-700 font-medium">
                     Service Area <span className="text-red-500">*</span>
                   </Label>
@@ -219,7 +218,7 @@ export function QuoteForm() {
                     value={formData.serviceArea}
                     onValueChange={(value) => handleSelectChange("serviceArea", value)}
                   >
-                    <SelectTrigger className="mt-2 border-sky-100 focus:border-sky-400">
+                    <SelectTrigger className="border-sky-100 focus:border-sky-400">
                       <SelectValue placeholder="Please Select" />
                     </SelectTrigger>
                     <SelectContent>
@@ -235,68 +234,44 @@ export function QuoteForm() {
             </div>
 
             {/* About Your Family */}
-            <div className="space-y-4 pt-4 border-t border-sky-100">
+            <div className="space-y-4 pt-6 border-t border-sky-100">
               <h3 className="text-lg font-semibold text-sky-700">About Your Family</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="adults" className="text-sky-700 font-medium">
-                    Adults <span className="text-red-500">*</span>
-                  </Label>
-                  <Select value={formData.adults} onValueChange={(value) => handleSelectChange("adults", value)}>
-                    <SelectTrigger className="mt-2 border-sky-100 focus:border-sky-400">
-                      <SelectValue placeholder="Please select number of adults" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="kids" className="text-sky-700 font-medium">
-                    Kids <span className="text-red-500">*</span>
-                  </Label>
-                  <Select value={formData.kids} onValueChange={(value) => handleSelectChange("kids", value)}>
-                    <SelectTrigger className="mt-2 border-sky-100 focus:border-sky-400">
-                      <SelectValue placeholder="Please select number of kids" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[0, 1, 2, 3, 4, 5, 6].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="pets" className="text-sky-700 font-medium">
-                    Pets <span className="text-red-500">*</span>
-                  </Label>
-                  <Select value={formData.pets} onValueChange={(value) => handleSelectChange("pets", value)}>
-                    <SelectTrigger className="mt-2 border-sky-100 focus:border-sky-400">
-                      <SelectValue placeholder="Please select number of pets" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[0, 1, 2, 3, 4, 5].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[
+                  { id: "adults", label: "Adults" },
+                  { id: "kids", label: "Kids" },
+                  { id: "pets", label: "Pets" },
+                ].map((field) => (
+                  <div key={field.id} className="space-y-2">
+                    <Label htmlFor={field.id} className="text-sky-700 font-medium">
+                      {field.label} <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      value={formData[field.id as keyof typeof formData]}
+                      onValueChange={(value) => handleSelectChange(field.id, value)}
+                    >
+                      <SelectTrigger className="border-sky-100 focus:border-sky-400">
+                        <SelectValue placeholder={`Please select number of ${field.label.toLowerCase()}`} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                          <SelectItem key={num} value={num.toString()}>
+                            {num}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* About Your House */}
-            <div className="space-y-4 pt-4 border-t border-sky-100">
+            <div className="space-y-4 pt-6 border-t border-sky-100">
               <h3 className="text-lg font-semibold text-sky-700">About Your House</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
                   <Label htmlFor="serviceLevel" className="text-sky-700 font-medium">
                     Service Level <span className="text-red-500">*</span>
                   </Label>
@@ -304,7 +279,7 @@ export function QuoteForm() {
                     value={formData.serviceLevel}
                     onValueChange={(value) => handleSelectChange("serviceLevel", value)}
                   >
-                    <SelectTrigger className="mt-2 border-sky-100 focus:border-sky-400">
+                    <SelectTrigger className="border-sky-100 focus:border-sky-400">
                       <SelectValue placeholder="Please select your service level" />
                     </SelectTrigger>
                     <SelectContent>
@@ -315,7 +290,7 @@ export function QuoteForm() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="squareFootage" className="text-sky-700 font-medium">
                     Area of House/Apt <span className="text-red-500">*</span>
                   </Label>
@@ -325,141 +300,51 @@ export function QuoteForm() {
                     placeholder="Square footage"
                     value={formData.squareFootage}
                     onChange={handleChange}
-                    className="mt-2 border-sky-100 focus:border-sky-400"
+                    className="border-sky-100 focus:border-sky-400"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="kitchens" className="text-sky-700 font-medium">
-                    Kitchen <span className="text-red-500">*</span>
-                  </Label>
-                  <Select value={formData.kitchens} onValueChange={(value) => handleSelectChange("kitchens", value)}>
-                    <SelectTrigger className="mt-2 border-sky-100 focus:border-sky-400">
-                      <SelectValue placeholder="Please select number of kitchens" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[0, 1, 2, 3, 4].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="fullBathrooms" className="text-sky-700 font-medium">
-                    Full Bathrooms <span className="text-red-500">*</span>
-                  </Label>
-                  <Select
-                    value={formData.fullBathrooms}
-                    onValueChange={(value) => handleSelectChange("fullBathrooms", value)}
-                  >
-                    <SelectTrigger className="mt-2 border-sky-100 focus:border-sky-400">
-                      <SelectValue placeholder="Please select number of full bathrooms" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[0, 1, 2, 3, 4, 5].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="halfBathrooms" className="text-sky-700 font-medium">
-                    Half Bathrooms <span className="text-red-500">*</span>
-                  </Label>
-                  <Select
-                    value={formData.halfBathrooms}
-                    onValueChange={(value) => handleSelectChange("halfBathrooms", value)}
-                  >
-                    <SelectTrigger className="mt-2 border-sky-100 focus:border-sky-400">
-                      <SelectValue placeholder="Please select number of half bathrooms" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[0, 1, 2, 3, 4].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              {/* Bathrooms and extras */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[
+                  { id: "kitchens", label: "Kitchens" },
+                  { id: "fullBathrooms", label: "Full Bathrooms" },
+                  { id: "halfBathrooms", label: "Half Bathrooms" },
+                  { id: "walkInShowers", label: "Walk In Showers" },
+                  { id: "largeOvalTubs", label: "Large Oval Tubs" },
+                  { id: "doubleSinks", label: "Double Sinks" },
+                ].map((field) => (
+                  <div key={field.id} className="space-y-2">
+                    <Label htmlFor={field.id} className="text-sky-700 font-medium">
+                      {field.label} <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      value={formData[field.id as keyof typeof formData]}
+                      onValueChange={(value) => handleSelectChange(field.id, value)}
+                    >
+                      <SelectTrigger className="border-sky-100 focus:border-sky-400">
+                        <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {[0, 1, 2, 3, 4, 5, 6].map((num) => (
+                          <SelectItem key={num} value={num.toString()}>
+                            {num}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="walkInShowers" className="text-sky-700 font-medium">
-                    Walk In Showers <span className="text-red-500">*</span>
-                  </Label>
-                  <Select
-                    value={formData.walkInShowers}
-                    onValueChange={(value) => handleSelectChange("walkInShowers", value)}
-                  >
-                    <SelectTrigger className="mt-2 border-sky-100 focus:border-sky-400">
-                      <SelectValue placeholder="Please select number of walk in showers" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[0, 1, 2, 3, 4].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="largeOvalTubs" className="text-sky-700 font-medium">
-                    Large Oval Tubs <span className="text-red-500">*</span>
-                  </Label>
-                  <Select
-                    value={formData.largeOvalTubs}
-                    onValueChange={(value) => handleSelectChange("largeOvalTubs", value)}
-                  >
-                    <SelectTrigger className="mt-2 border-sky-100 focus:border-sky-400">
-                      <SelectValue placeholder="Please select number of large oval tubs" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[0, 1, 2, 3].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="doubleSinks" className="text-sky-700 font-medium">
-                    Double Sinks <span className="text-red-500">*</span>
-                  </Label>
-                  <Select
-                    value={formData.doubleSinks}
-                    onValueChange={(value) => handleSelectChange("doubleSinks", value)}
-                  >
-                    <SelectTrigger className="mt-2 border-sky-100 focus:border-sky-400">
-                      <SelectValue placeholder="Please select number of double sinks" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[0, 1, 2, 3, 4].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
                   <Label htmlFor="basement" className="text-sky-700 font-medium">
                     Do Basement <span className="text-red-500">*</span>
                   </Label>
                   <Select value={formData.basement} onValueChange={(value) => handleSelectChange("basement", value)}>
-                    <SelectTrigger className="mt-2 border-sky-100 focus:border-sky-400">
+                    <SelectTrigger className="border-sky-100 focus:border-sky-400">
                       <SelectValue placeholder="Do you want the basement cleaned" />
                     </SelectTrigger>
                     <SelectContent>
@@ -468,12 +353,12 @@ export function QuoteForm() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="dusting" className="text-sky-700 font-medium">
                     Dusting <span className="text-red-500">*</span>
                   </Label>
                   <Select value={formData.dusting} onValueChange={(value) => handleSelectChange("dusting", value)}>
-                    <SelectTrigger className="mt-2 border-sky-100 focus:border-sky-400">
+                    <SelectTrigger className="border-sky-100 focus:border-sky-400">
                       <SelectValue placeholder="Please select time required to dust" />
                     </SelectTrigger>
                     <SelectContent>
@@ -487,24 +372,22 @@ export function QuoteForm() {
             </div>
 
             {/* Comments */}
-            <div className="space-y-4 pt-4 border-t border-sky-100">
-              <div>
-                <Label htmlFor="comments" className="text-sky-700 font-medium">
-                  Comments
-                </Label>
-                <Textarea
-                  id="comments"
-                  name="comments"
-                  value={formData.comments}
-                  onChange={handleChange}
-                  placeholder="Any additional information or special requests..."
-                  className="mt-2 border-sky-100 focus:border-sky-400 min-h-[120px]"
-                />
-              </div>
+            <div className="space-y-2 pt-6 border-t border-sky-100">
+              <Label htmlFor="comments" className="text-sky-700 font-medium">
+                Comments
+              </Label>
+              <Textarea
+                id="comments"
+                name="comments"
+                value={formData.comments}
+                onChange={handleChange}
+                placeholder="Any additional information or special requests..."
+                className="border-sky-100 focus:border-sky-400 min-h-[120px]"
+              />
             </div>
 
             {/* Submit Button */}
-            <div className="pt-4 border-t border-sky-100">
+            <div className="pt-6 border-t border-sky-100">
               <Button
                 type="submit"
                 disabled={isLoading}
