@@ -280,41 +280,37 @@ export default function HomePage() {
       </section>
 
       {/* 👥 MEET THE TEAM */}
-      <section className="mx-auto max-w-6xl px-4 sm:px-6 py-16">
-        <motion.h2
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-3xl md:text-4xl font-extrabold text-center bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 bg-clip-text text-transparent mb-8"
-        >
-          Meet Our Team
-        </motion.h2>
+<section className="mx-auto max-w-6xl px-4 sm:px-6 py-16">
+  <motion.h2
+    initial={{ opacity: 0, y: 40 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.8 }}
+    className="text-3xl md:text-4xl font-extrabold text-center bg-gradient-to-r from-blue-600 via-sky-500 to-cyan-400 bg-clip-text text-transparent mb-8"
+  >
+    Meet Our Team
+  </motion.h2>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {[
-            { name: "Alice Johnson", role: "Founder & CEO", img: "/team/alice.jpg" },
-            { name: "Mark Lee", role: "Operations Manager", img: "/team/mark.jpg" },
-            { name: "Sophia Brown", role: "Lead Cleaner", img: "/team/sophia.jpg" },
-            { name: "James Wilson", role: "Customer Support", img: "/team/james.jpg" },
-          ].map((member, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: i * 0.2 }}
-              className="bg-white rounded-xl border p-6 shadow-sm hover:shadow-lg transition text-center"
-            >
-              <img
-                src={member.img}
-                alt={member.name}
-                className="w-32 h-32 object-cover rounded-full mx-auto mb-4"
-              />
-              <h4 className="font-semibold text-sky-700">{member.name}</h4>
-              <p className="text-muted-foreground">{member.role}</p>
-            </motion.div>
-          ))}
-        </div>
-      </section>
+  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    {[
+      { name: "George", role: "Founder & CEO" },
+      { name: "Moe", role: "Operations Manager" },
+      { name: "Lito", role: "Supervisor & Quality Control" },
+    ].map((member, i) => (
+      <motion.div
+        key={i}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: i * 0.2 }}
+        className="bg-white rounded-xl border p-6 shadow-sm hover:shadow-lg transition text-center"
+      >
+        {/* Removed image — now name is the main element */}
+        <h4 className="font-bold text-sky-700 text-lg">{member.name}</h4>
+        <p className="text-muted-foreground font-medium mt-1">{member.role}</p>
+      </motion.div>
+    ))}
+  </div>
+</section>
+
 
       {/* 📢 CALL TO ACTION BANNER */}
       <section className="bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 py-16 text-center text-white">
