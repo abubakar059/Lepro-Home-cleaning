@@ -279,8 +279,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 👥 MEET THE TEAM */}
-<section className="mx-auto max-w-6xl px-4 sm:px-6 py-16">
+      {/* 👥 MEET OUR TEAM */}
+     <section className="mx-auto max-w-6xl px-4 sm:px-6 py-16">
   <motion.h2
     initial={{ opacity: 0, y: 40 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -290,7 +290,7 @@ export default function HomePage() {
     Meet Our Team
   </motion.h2>
 
-  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 justify-items-center mx-auto">
     {[
       { name: "George", role: "Founder & CEO" },
       { name: "Moe", role: "Operations Manager" },
@@ -301,16 +301,14 @@ export default function HomePage() {
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: i * 0.2 }}
-        className="bg-white rounded-xl border p-6 shadow-sm hover:shadow-lg transition text-center"
+        className="bg-white rounded-xl border p-6 shadow-sm hover:shadow-lg transition flex flex-col items-center text-center w-full max-w-xs"
       >
-        {/* Removed image — now name is the main element */}
         <h4 className="font-bold text-sky-700 text-lg">{member.name}</h4>
         <p className="text-muted-foreground font-medium mt-1">{member.role}</p>
       </motion.div>
     ))}
   </div>
 </section>
-
 
       {/* 📢 CALL TO ACTION BANNER */}
       <section className="bg-gradient-to-r from-sky-600 via-blue-600 to-cyan-500 py-16 text-center text-white">

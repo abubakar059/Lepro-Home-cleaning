@@ -75,7 +75,7 @@ export default function RootLayout({
                         +1 (613) 716-1606
                       </a>
                     </span>
-                    <span className="block">📍 7096 Mason St</span>
+                    <span className="block">📍 Suite 104 2 Gurdwara road,Ottawa,Ontario,Canada</span>
                     <span className="block">🕐 Mon–Sat, 8am–6pm</span>
                   </p>
                 </div>
